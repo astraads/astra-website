@@ -30,11 +30,15 @@ function InsightBorderCard({
   return (
     <div
       className="insight-border-card relative overflow-hidden rounded-2xl p-px"
-      data-active={active ? "" : undefined}
+      data-active={active ? "true" : undefined}
       style={{ "--border-delay": `${delay}s` } as CSSProperties}
     >
-      <div className="insight-border-card__beam pointer-events-none absolute inset-0 rounded-2xl" aria-hidden="true" />
-      <div className="cz-glass insight-border-card__inner relative rounded-[calc(1rem-1px)] px-6 py-7 text-center md:px-7 md:py-8">
+      {/* Real node (not ::before) — Safari mobile often freezes pseudo-element orbit animations */}
+      <div className="insight-border-card__beam pointer-events-none absolute inset-0 overflow-hidden rounded-2xl" aria-hidden="true">
+        <div className="insight-border-card__spin" />
+        <div className="insight-border-card__shimmer" />
+      </div>
+      <div className="cz-glass insight-border-card__inner relative z-[1] rounded-[calc(1rem-1px)] px-6 py-7 text-center md:px-7 md:py-8">
         {children}
       </div>
     </div>
@@ -170,52 +174,110 @@ export function TransformationSection() {
           background: var(--cz-glass-bg);
         }
 
-        .insight-border-card__beam::before {
-          content: "";
+        .insight-border-card__spin {
           position: absolute;
           left: 50%;
           top: 50%;
-          width: 220%;
-          aspect-ratio: 1;
-          transform: translate(-50%, -50%);
+          width: 180%;
+          height: 180%;
+          margin-left: -90%;
+          margin-top: -90%;
           background: conic-gradient(
             from 0deg,
             transparent 0deg,
-            transparent 248deg,
-            var(--cz-accent) 292deg,
-            rgba(255, 255, 255, 0.9) 312deg,
-            var(--cz-accent) 332deg,
+            transparent 250deg,
+            var(--cz-accent) 290deg,
+            rgba(255, 255, 255, 0.95) 312deg,
+            var(--cz-accent) 335deg,
             transparent 360deg
           );
           opacity: 0;
-          animation: insight-border-orbit 4.8s linear infinite;
-          animation-play-state: paused;
-          animation-delay: var(--border-delay, 0s);
-          transition: opacity 0.6s ease;
+          transform: translate3d(0, 0, 0);
+          will-change: transform;
+          /* Do NOT use animation-play-state — Safari iOS often never resumes it */
         }
 
-        .insight-border-card[data-active] .insight-border-card__beam::before {
+        .insight-border-card__shimmer {
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          opacity: 0;
+          background: radial-gradient(
+            ellipse 55% 40% at 20% 30%,
+            color-mix(in srgb, var(--cz-accent) 55%, transparent),
+            transparent 70%
+          );
+          transform: translate3d(-30%, 0, 0);
+          will-change: transform, opacity;
+          pointer-events: none;
+        }
+
+        .insight-border-card[data-active="true"] .insight-border-card__spin {
           opacity: 1;
-          animation-play-state: running;
+          animation: insight-border-orbit 3.6s linear infinite;
+          animation-delay: var(--border-delay, 0s);
         }
 
-        .insight-border-card[data-active] {
+        .insight-border-card[data-active="true"] .insight-border-card__shimmer {
+          opacity: 0.85;
+          animation: insight-shimmer-sweep 4.2s ease-in-out infinite;
+          animation-delay: var(--border-delay, 0s);
+        }
+
+        .insight-border-card[data-active="true"] {
           box-shadow:
-            0 0 0 1px color-mix(in oklch, var(--cz-accent) 25%, transparent),
-            0 12px 40px -16px color-mix(in oklch, var(--cz-accent) 35%, transparent);
+            0 0 0 1px color-mix(in srgb, var(--cz-accent) 28%, transparent),
+            0 12px 40px -16px color-mix(in srgb, var(--cz-accent) 40%, transparent);
         }
 
         @keyframes insight-border-orbit {
+          from {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
           to {
-            transform: translate(-50%, -50%) rotate(360deg);
+            transform: translate3d(0, 0, 0) rotate(360deg);
+          }
+        }
+
+        @keyframes insight-shimmer-sweep {
+          0%,
+          100% {
+            transform: translate3d(-35%, 8%, 0) scale(1);
+            opacity: 0.35;
+          }
+          50% {
+            transform: translate3d(35%, -6%, 0) scale(1.15);
+            opacity: 0.9;
+          }
+        }
+
+        /* Mobile: faster, more obvious motion (phones throttle heavy conic spins) */
+        @media (max-width: 767px) {
+          .insight-border-card[data-active="true"] .insight-border-card__spin {
+            width: 220%;
+            height: 220%;
+            margin-left: -110%;
+            margin-top: -110%;
+            animation-duration: 2.4s;
+          }
+
+          .insight-border-card[data-active="true"] .insight-border-card__shimmer {
+            animation-duration: 2.8s;
+            opacity: 1;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .insight-border-card__beam::before {
+          .insight-border-card[data-active="true"] .insight-border-card__spin {
+            animation: none !important;
+            opacity: 0.55;
+            transform: rotate(40deg);
+          }
+
+          .insight-border-card[data-active="true"] .insight-border-card__shimmer {
             animation: none !important;
             opacity: 0.4;
-            transform: translate(-50%, -50%) rotate(45deg);
+            transform: none;
           }
         }
       `}</style>

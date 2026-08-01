@@ -1,7 +1,17 @@
-import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import { trackEvent } from "@/lib/analytics-events";
 import { saveLead } from "@/lib/leads";
+import {
+  buildE164,
+  detectDialCode,
+  ensureDialOption,
+  guessDialCodeSync,
+  isPlausibleLocalPhone,
+  normalizeLocalNumber,
+  optionValue,
+  parseOptionValue,
+} from "@/lib/phone-country";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { getWhatsAppUrlWithCustomMessage, isConfigured, WHATSAPP_NUMBER } from "@/config/site";
 
@@ -16,14 +26,14 @@ const SERVICES = [
 const MAX = {
   name: 80,
   business: 120,
-  whatsapp: 32,
+  whatsappLocal: 15,
   message: 500,
 } as const;
 
 type FormState = {
   name: string;
   business: string;
-  whatsapp: string;
+  whatsappLocal: string;
   service: string;
   message: string;
   /** Honeypot — must stay empty */
@@ -33,7 +43,7 @@ type FormState = {
 const INITIAL: FormState = {
   name: "",
   business: "",
-  whatsapp: "",
+  whatsappLocal: "",
   service: "web",
   message: "",
   company_url: "",
@@ -43,23 +53,35 @@ function sanitize(value: string, max: number) {
   return value.replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, max);
 }
 
-function isPlausiblePhone(value: string) {
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 8 && digits.length <= 15;
-}
-
 export function LeadForm() {
+  const guessed = guessDialCodeSync();
+  const [dialCountry, setDialCountry] = useState(guessed.country);
+  const [dialCode, setDialCode] = useState(guessed.dial);
+  const [dialOptions, setDialOptions] = useState(() => ensureDialOption(guessed.country, guessed.dial));
   const [form, setForm] = useState<FormState>(INITIAL);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const lastSubmit = useRef(0);
+  const userChangedDial = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    detectDialCode().then((detected) => {
+      if (cancelled || userChangedDial.current) return;
+      setDialCountry(detected.country);
+      setDialCode(detected.dial);
+      setDialOptions(ensureDialOption(detected.country, detected.dial));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // Anti-spam: honeypot filled → fake success, no open
     if (form.company_url.trim()) {
       setSent(true);
       return;
@@ -73,16 +95,17 @@ export function LeadForm() {
 
     const name = sanitize(form.name, MAX.name);
     const business = sanitize(form.business, MAX.business);
-    const whatsapp = sanitize(form.whatsapp, MAX.whatsapp);
+    const local = normalizeLocalNumber(form.whatsappLocal, dialCode);
     const message = sanitize(form.message, MAX.message);
+    const whatsapp = buildE164(dialCode, local);
 
-    if (!name || !business || !whatsapp) {
+    if (!name || !business || !local) {
       setError("Completa los campos obligatorios.");
       return;
     }
 
-    if (!isPlausiblePhone(whatsapp)) {
-      setError("Revisa el número de WhatsApp (incluye código de país).");
+    if (!isPlausibleLocalPhone(local, dialCode)) {
+      setError("Revisa tu número de WhatsApp.");
       return;
     }
 
@@ -105,7 +128,6 @@ export function LeadForm() {
     trackEvent("lead_form_submit", { service: form.service });
     trackEvent("service_select", { service: form.service });
 
-    // Persist in Supabase when configured; never block WhatsApp conversion.
     await saveLead({
       name,
       business,
@@ -132,7 +154,6 @@ export function LeadForm() {
       data-analytics="lead-form"
       noValidate
     >
-      {/* Honeypot — hidden from users */}
       <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
         <label>
           Website
@@ -174,17 +195,47 @@ export function LeadForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="WhatsApp" required>
-          <input
-            required
-            name="whatsapp"
-            type="tel"
-            autoComplete="tel"
-            maxLength={MAX.whatsapp}
-            value={form.whatsapp}
-            onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value }))}
-            className="w-full rounded-xl border border-border bg-background/40 px-4 py-3 text-sm outline-none focus-visible:border-[color:var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/30"
-            placeholder="+1 555 000 0000"
-          />
+          <div className="flex gap-2">
+            <select
+              name="country_code"
+              aria-label="Indicativo de país"
+              value={optionValue({ country: dialCountry, dial: dialCode, label: "" })}
+              onChange={(e) => {
+                userChangedDial.current = true;
+                const next = parseOptionValue(e.target.value);
+                setDialCountry(next.country);
+                setDialCode(next.dial);
+              }}
+              className="w-[7.5rem] shrink-0 rounded-xl border border-border bg-background/40 px-2 py-3 text-sm outline-none focus-visible:border-[color:var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/30 sm:w-[8.5rem]"
+            >
+              {dialOptions.map((opt) => (
+                <option key={`${opt.country}-${opt.dial}-${opt.label}`} value={optionValue(opt)}>
+                  +{opt.dial}
+                </option>
+              ))}
+            </select>
+            <input
+              required
+              name="whatsapp"
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              maxLength={MAX.whatsappLocal}
+              value={form.whatsappLocal}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  whatsappLocal: normalizeLocalNumber(e.target.value, dialCode),
+                }))
+              }
+              className="min-w-0 flex-1 rounded-xl border border-border bg-background/40 px-4 py-3 text-sm outline-none focus-visible:border-[color:var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent)]/30"
+              placeholder="300 123 4567"
+            />
+          </div>
+          <span className="mt-1.5 block text-[11px] text-muted-foreground">
+            Detectamos tu país ({dialOptions.find((o) => o.country === dialCountry)?.label ?? `+${dialCode}`}).
+            Solo escribe tu número — puedes cambiar el indicativo si hace falta.
+          </span>
         </Field>
         <Field label="Servicio de interés" required>
           <select

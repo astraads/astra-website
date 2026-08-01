@@ -16,7 +16,6 @@ import { HeroCarousel } from "@/components/hero-carousel";
 import { Analytics } from "@/components/analytics";
 import { LeadForm } from "@/components/lead-form";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
-import { AstraLogo } from "@/components/astra-logo";
 import {
   BRAND,
   getInstagramUrl,
@@ -185,10 +184,16 @@ function useReveal<T extends HTMLElement>() {
           io.disconnect();
         }
       },
-      { threshold: 0.15 },
+      // Mobile viewports are short; a high threshold never fires and sections stay invisible.
+      { threshold: 0.05, rootMargin: "0px 0px -5% 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
+    // Safety: never leave content stuck at opacity-0 if IO misbehaves.
+    const fallback = window.setTimeout(() => setShown(true), 1800);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, []);
   return { ref, shown };
 }
@@ -283,7 +288,6 @@ function ThemeToggle() {
 }
 
 function Header() {
-  const { theme } = useTheme();
   const [y, setY] = useState(0);
   const [lastY, setLastY] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -315,8 +319,6 @@ function Header() {
     { href: "#faq", label: "FAQ" },
   ] as const;
 
-  const logoOnDark = theme === "dark" || y <= 40;
-
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-transform duration-500 ${visible || open ? "translate-y-0" : "-translate-y-full"}`}
@@ -324,8 +326,12 @@ function Header() {
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between px-6 py-4 transition-all ${y > 40 || open ? "glass-strong mt-3 rounded-full" : "text-white"}`}
       >
-        <a href="#top" className="inline-flex items-center" onClick={() => setOpen(false)}>
-          <AstraLogo inverted={logoOnDark} />
+        <a
+          href="#top"
+          className="font-display text-lg font-bold tracking-tight"
+          onClick={() => setOpen(false)}
+        >
+          ASTRA<span className="text-[#6C63FF]">™</span>
         </a>
         <nav
           className={`hidden items-center gap-7 text-sm md:flex ${y > 40 ? "text-muted-foreground" : "text-white/70"}`}
@@ -848,7 +854,7 @@ function FinalCta() {
   return (
     <section id="cta" className="relative overflow-hidden border-t border-border px-6 py-32">
         <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-1/2 h-[70vh] w-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[color:var(--color-accent)]/12 blur-[140px]" />
+        <div className="absolute left-1/2 top-1/2 h-[50vh] w-[50vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[color:var(--color-accent)]/20 blur-[48px] md:h-[70vh] md:w-[70vh] md:bg-[color:var(--color-accent)]/12 md:blur-[140px]" />
       </div>
 
       <div className="mx-auto max-w-4xl text-center">
@@ -917,7 +923,9 @@ function Footer() {
     <footer className="border-t border-border px-6 py-12">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
         <div className="flex items-center gap-3">
-          <AstraLogo />
+          <span className="font-display text-sm font-bold tracking-tight">
+            ASTRA<span className="text-[#6C63FF]">™</span>
+          </span>
           <span className="text-xs text-muted-foreground">Partner tecnológico global</span>
         </div>
         <div className="flex flex-wrap justify-center gap-5 text-xs text-muted-foreground">

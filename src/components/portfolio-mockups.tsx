@@ -75,7 +75,14 @@ function HeroImage({
 }) {
   return (
     <div className="absolute inset-0">
-      <img src={src} alt={alt} className="h-full w-full object-cover" draggable={false} />
+      <img
+        src={src}
+        alt={alt}
+        className="h-full w-full object-cover"
+        draggable={false}
+        loading="lazy"
+        decoding="async"
+      />
       <div className={`absolute inset-0 bg-gradient-to-t ${overlay}`} />
     </div>
   );

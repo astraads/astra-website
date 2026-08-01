@@ -10,7 +10,6 @@ import {
 
 import { PORTFOLIO_MOCKUPS } from "@/components/portfolio-mockups";
 import { BRAND, getWhatsAppUrl, isConfigured, WHATSAPP_NUMBER } from "@/config/site";
-import logoAstra from "@/assets/logo-astra.png";
 
 const PORTFOLIO = [
   {
@@ -117,6 +116,7 @@ export function HeroCarousel() {
   const wheelAcc = useRef(0);
   const [slide, setSlide] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [paused, setPaused] = useState(false);
   const [parallax, setParallax] = useState(0);
   const [glare, setGlare] = useState({ x: 50, y: 40 });
@@ -132,35 +132,51 @@ export function HeroCarousel() {
   const goNext = useCallback(() => goTo(slide + 1), [goTo, slide]);
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const onChange = () => setReducedMotion(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
+    const mqMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mqMobile = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+    const sync = () => {
+      setReducedMotion(mqMotion.matches);
+      setIsMobile(mqMobile.matches);
+    };
+    sync();
+    mqMotion.addEventListener("change", sync);
+    mqMobile.addEventListener("change", sync);
+    return () => {
+      mqMotion.removeEventListener("change", sync);
+      mqMobile.removeEventListener("change", sync);
+    };
   }, []);
 
   useEffect(() => {
     if (reducedMotion || paused) return;
-    const id = setInterval(() => goTo(slide + 1), 6000);
+    const id = setInterval(() => goTo(slide + 1), isMobile ? 5000 : 6000);
     return () => clearInterval(id);
-  }, [goTo, slide, reducedMotion, paused]);
+  }, [goTo, slide, reducedMotion, paused, isMobile]);
 
   useEffect(() => {
+    let raf = 0;
     const onScroll = () => {
-      const el = sectionRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const progress = 1 - Math.min(1, Math.max(0, rect.top / (window.innerHeight * 0.85)));
-      setParallax(progress);
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const el = sectionRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const progress = 1 - Math.min(1, Math.max(0, rect.top / (window.innerHeight * 0.85)));
+        setParallax(progress);
+      });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el || reducedMotion) return;
+    if (!el || reducedMotion || isMobile) return;
 
     const onWheel = (e: WheelEvent) => {
       if (!el.contains(e.target as Node)) return;
@@ -173,7 +189,7 @@ export function HeroCarousel() {
 
     el.addEventListener("wheel", onWheel, { passive: true });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [goNext, goPrev, reducedMotion]);
+  }, [goNext, goPrev, reducedMotion, isMobile]);
 
   const onPointerDown = (e: React.PointerEvent) => {
     dragStart.current = e.clientX;
@@ -189,6 +205,7 @@ export function HeroCarousel() {
   };
 
   const onCardMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (isMobile) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
@@ -208,6 +225,7 @@ export function HeroCarousel() {
   const accent = active.accent;
   const whatsappUrl = getWhatsAppUrl("project");
   const whatsappReady = isConfigured(WHATSAPP_NUMBER);
+  const maxOffset = isMobile ? 1 : 3;
 
   return (
     <section
@@ -217,24 +235,26 @@ export function HeroCarousel() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Ambient background */}
+      {/* Ambient background — CSS drift on inner orbs so lights move on mobile too */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div
-          className="premium-ambient-orb absolute -left-[20%] top-[10%] h-[60vh] w-[60vh] rounded-full blur-[120px] transition-[background,transform] duration-[1400ms]"
-          style={{
-            background: accent,
-            opacity: 0.18,
-            transform: `translateY(${parallax * -30}px)`,
-          }}
-        />
+          className="absolute -left-[20%] top-[10%] h-[42vh] w-[42vh] md:h-[60vh] md:w-[60vh]"
+          style={{ transform: `translateY(${parallax * -30}px)` }}
+        >
+          <div
+            className="premium-ambient-orb h-full w-full rounded-full blur-[40px] transition-[background] duration-[1400ms] md:blur-[120px]"
+            style={{ background: accent, opacity: isMobile ? 0.32 : 0.18 }}
+          />
+        </div>
         <div
-          className="premium-ambient-orb absolute -right-[15%] bottom-[20%] h-[50vh] w-[50vh] rounded-full blur-[100px] transition-[background,transform] duration-[1400ms]"
-          style={{
-            background: "#6C63FF",
-            opacity: 0.12,
-            transform: `translateY(${parallax * 20}px)`,
-          }}
-        />
+          className="absolute -right-[15%] bottom-[20%] h-[36vh] w-[36vh] md:h-[50vh] md:w-[50vh]"
+          style={{ transform: `translateY(${parallax * 20}px)` }}
+        >
+          <div
+            className="premium-ambient-orb premium-ambient-orb--b h-full w-full rounded-full blur-[36px] transition-[background] duration-[1400ms] md:blur-[100px]"
+            style={{ background: "#6C63FF", opacity: isMobile ? 0.26 : 0.12 }}
+          />
+        </div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.04),transparent_50%)]" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#030303] via-transparent to-[#030303]" />
         <div className="premium-particles absolute inset-0 opacity-40" />
@@ -242,19 +262,9 @@ export function HeroCarousel() {
 
       {/* Section intro — brand + value proposition */}
       <div className="relative z-[2] mx-auto w-full max-w-4xl shrink-0 px-6 pt-[5.75rem] pb-4 text-center md:pt-[6.5rem] md:pb-6">
-        <div className="flex items-center justify-center gap-3">
-          <img
-            src={logoAstra}
-            alt="ASTRA"
-            width={36}
-            height={36}
-            className="h-9 w-9 object-contain brightness-0 invert"
-            decoding="async"
-          />
-          <p className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
-            ASTRA<span className="text-[#6C63FF]">™</span>
-          </p>
-        </div>
+        <p className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+          ASTRA<span className="text-[#6C63FF]">™</span>
+        </p>
         <p className="mt-3 text-[10px] uppercase tracking-[0.35em] text-white/45 md:tracking-[0.4em]">
           {BRAND.microcopy}
         </p>
@@ -296,12 +306,12 @@ export function HeroCarousel() {
           <div className="premium-coverflow-track relative mx-auto w-[min(82vw,400px)] aspect-[3/4] md:w-[440px]">
             {PORTFOLIO.map((item, i) => {
               const offset = getOffset(i, slide);
-              if (Math.abs(offset) > 3) return null;
+              if (Math.abs(offset) > maxOffset) return null;
               const isActive = offset === 0;
               const style = getCardTransform(offset, reducedMotion);
               const Mockup = PORTFOLIO_MOCKUPS[item.title];
               const tiltStyle: CSSProperties =
-                isActive && !reducedMotion
+                isActive && !reducedMotion && !isMobile
                   ? {
                       transform: `rotateX(${tilt.y * -6}deg) rotateY(${tilt.x * 6}deg)`,
                     }

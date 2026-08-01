@@ -41,7 +41,7 @@ function InsightBorderCard({
   );
 }
 
-function useInView<T extends HTMLElement>(threshold = 0.15) {
+function useInView<T extends HTMLElement>(threshold = 0.08) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -55,10 +55,14 @@ function useInView<T extends HTMLElement>(threshold = 0.15) {
           io.disconnect();
         }
       },
-      { threshold },
+      { threshold, rootMargin: "0px 0px -5% 0px" },
     );
     io.observe(el);
-    return () => io.disconnect();
+    const fallback = window.setTimeout(() => setInView(true), 2000);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, [threshold]);
 
   return { ref, inView };
@@ -70,18 +74,26 @@ function useParallax(speed = 0.3) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    let raf = 0;
 
     const onScroll = () => {
-      const rect = el.getBoundingClientRect();
-      const viewH = window.innerHeight;
-      if (rect.bottom < 0 || rect.top > viewH) return;
-      const progress = (viewH - rect.top) / (viewH + rect.height);
-      el.style.transform = `translate3d(0, ${(progress - 0.5) * speed * 100}px, 0)`;
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const rect = el.getBoundingClientRect();
+        const viewH = window.innerHeight;
+        if (rect.bottom < 0 || rect.top > viewH) return;
+        const progress = (viewH - rect.top) / (viewH + rect.height);
+        el.style.transform = `translate3d(0, ${(progress - 0.5) * speed * 100}px, 0)`;
+      });
     };
 
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [speed]);
 
   return ref;
@@ -104,11 +116,11 @@ export function TransformationSection() {
           <div className="absolute inset-0 cz-scrim-gradient" />
           <div className="absolute inset-0 cz-scrim-radial" />
           <div
-            className="absolute -left-[10%] top-[15%] h-[40vh] w-[40vh] rounded-full opacity-20 blur-[100px]"
+            className="absolute -left-[10%] top-[15%] h-[32vh] w-[32vh] rounded-full opacity-30 blur-[40px] md:h-[40vh] md:w-[40vh] md:opacity-20 md:blur-[100px]"
             style={{ background: "var(--cz-accent)" }}
           />
           <div
-            className="absolute -right-[8%] bottom-[10%] h-[35vh] w-[35vh] rounded-full opacity-10 blur-[90px]"
+            className="absolute -right-[8%] bottom-[10%] h-[28vh] w-[28vh] rounded-full opacity-[0.16] blur-[36px] md:h-[35vh] md:w-[35vh] md:opacity-10 md:blur-[90px]"
             style={{ background: "#ffffff" }}
           />
         </div>

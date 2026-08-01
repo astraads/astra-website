@@ -25,6 +25,11 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Vercel / Supabase local
+.vercel
+supabase/.temp
+supabase/.branches
+
 # OS / editor
 .vscode/*
 !.vscode/extensions.json

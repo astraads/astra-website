@@ -1,6 +1,8 @@
 import { useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import { trackEvent } from "@/lib/analytics-events";
+import { saveLead } from "@/lib/leads";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { getWhatsAppUrlWithCustomMessage, isConfigured, WHATSAPP_NUMBER } from "@/config/site";
 
 const SERVICES = [
@@ -50,9 +52,10 @@ export function LeadForm() {
   const [form, setForm] = useState<FormState>(INITIAL);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const lastSubmit = useRef(0);
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -84,6 +87,7 @@ export function LeadForm() {
     }
 
     lastSubmit.current = now;
+    setSubmitting(true);
 
     const serviceLabel = SERVICES.find((s) => s.value === form.service)?.label ?? form.service;
     const body = [
@@ -101,8 +105,18 @@ export function LeadForm() {
     trackEvent("lead_form_submit", { service: form.service });
     trackEvent("service_select", { service: form.service });
 
+    // Persist in Supabase when configured; never block WhatsApp conversion.
+    await saveLead({
+      name,
+      business,
+      whatsapp,
+      service: form.service,
+      message,
+    });
+
     const url = getWhatsAppUrlWithCustomMessage(body);
     setSent(true);
+    setSubmitting(false);
 
     if (isConfigured(WHATSAPP_NUMBER) && url.startsWith("http")) {
       window.open(url, "_blank", "noopener,noreferrer");
@@ -204,8 +218,11 @@ export function LeadForm() {
       </Field>
 
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Al enviar, se abrirá WhatsApp con tu mensaje. No almacenamos estos datos en un servidor propio: se
-        transmiten a través de WhatsApp. Consulta nuestra{" "}
+        Al enviar, se abrirá WhatsApp con tu mensaje
+        {isSupabaseConfigured
+          ? " y registraremos tu solicitud en nuestro CRM interno (Supabase) para darte seguimiento"
+          : ""}
+        . Consulta nuestra{" "}
         <a href="/privacidad" className="underline underline-offset-2 hover:text-foreground">
           política de privacidad
         </a>
@@ -220,10 +237,11 @@ export function LeadForm() {
 
       <button
         type="submit"
-        className="w-full min-h-11 rounded-full btn-cta py-3.5 text-sm font-semibold transition-transform hover:scale-[1.01] sm:w-auto sm:px-10"
+        disabled={submitting}
+        className="w-full min-h-11 rounded-full btn-cta py-3.5 text-sm font-semibold transition-transform hover:scale-[1.01] disabled:opacity-60 sm:w-auto sm:px-10"
         data-analytics="lead-form-submit"
       >
-        Enviar y hablar por WhatsApp
+        {submitting ? "Enviando…" : "Enviar y hablar por WhatsApp"}
       </button>
 
       {sent && !error && (

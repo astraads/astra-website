@@ -26,8 +26,10 @@ Edita `.env.local` con tus valores reales.
 | `VITE_META_PIXEL_ID` | Meta Pixel (opcional) | Sí |
 | `VITE_GOOGLE_ANALYTICS_ID` | GA4 (opcional) | Sí |
 | `VITE_GOOGLE_TAG_MANAGER_ID` | GTM (opcional) | Sí |
+| `VITE_SUPABASE_URL` | URL del proyecto Supabase | Sí |
+| `VITE_SUPABASE_ANON_KEY` | Anon/public key de Supabase | Sí (pública; RLS protege datos) |
 
-**Nunca** pongas API keys privadas, tokens de servidor o contraseñas en variables `VITE_*` (se embeben en el frontend).
+**Nunca** pongas la `service_role` key, tokens de servidor o contraseñas en variables `VITE_*` (se embeben en el frontend).
 
 ## Desarrollo
 
@@ -44,13 +46,24 @@ npm run build
 npm run preview
 ```
 
-## Despliegue
+## Despliegue (Vercel + Supabase)
 
-1. Configura las mismas variables `VITE_*` en el panel del hosting (Cloudflare / Vercel / Netlify / etc.).
-2. Activa HTTPS y redirige HTTP → HTTPS.
-3. Apunta el dominio a la app y actualiza `VITE_SITE_URL`, `public/sitemap.xml` y `public/robots.txt`.
-4. Verifica `/`, `/privacidad`, `/terminos` y refresh sin 404.
-5. Comprueba que `public/_headers` se aplique (security headers).
+### 1. Supabase
+
+1. Crea un proyecto en [supabase.com](https://supabase.com/dashboard) (organización ASTRA).
+2. En **SQL Editor**, ejecuta el contenido de `supabase/migrations/20260322000000_leads.sql`.
+3. En **Project Settings → API**, copia `Project URL` y `anon` `public` key.
+4. Pégalas en `.env.local` como `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
+
+Los leads del formulario quedan en la tabla `leads` (solo insert público; lectura solo desde el dashboard).
+
+### 2. Vercel
+
+1. En [vercel.com/new](https://vercel.com/new), importa el repo `astraads/astra-website`.
+2. Framework: Vite (auto). Build: `npm run build`. No pongas Output Directory manual.
+3. Añade las mismas variables `VITE_*` (WhatsApp, Instagram, Site URL, Supabase).
+4. Deploy. Conecta el dominio y actualiza `VITE_SITE_URL`, `public/sitemap.xml` y `public/robots.txt`.
+5. Verifica `/`, `/privacidad`, `/terminos` y que el formulario guarde en Supabase + abra WhatsApp.
 
 ## Cambiar WhatsApp o Instagram
 

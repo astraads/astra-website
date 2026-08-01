@@ -384,6 +384,32 @@
 
 .premium-ambient-orb {
   will-change: transform;
+  animation: premium-orb-drift 14s ease-in-out infinite;
+}
+
+.premium-ambient-orb--b {
+  animation-name: premium-orb-drift-alt;
+  animation-duration: 18s;
+}
+
+@keyframes premium-orb-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(5%, 7%, 0) scale(1.08);
+  }
+}
+
+@keyframes premium-orb-drift-alt {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-6%, -5%, 0) scale(1.06);
+  }
 }
 
 .premium-particles {
@@ -398,8 +424,25 @@
   100% { transform: translateY(-48px); }
 }
 
+@media (max-width: 767px) {
+  /* Heavy blur tanks mobile GPUs and Safari often drops the glow entirely. */
+  .premium-particles {
+    opacity: 0.22;
+    animation-duration: 40s;
+  }
+
+  .premium-ambient-orb {
+    animation-duration: 10s;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .premium-particles {
+    animation: none;
+  }
+
+  .premium-ambient-orb,
+  .premium-ambient-orb--b {
     animation: none;
   }
 

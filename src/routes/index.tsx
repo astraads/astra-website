@@ -15,6 +15,7 @@ import { TransformationSection } from "@/components/transformation-section";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { Analytics } from "@/components/analytics";
 import { LeadForm } from "@/components/lead-form";
+import { ScrollProgress, ScrollReveal } from "@/components/scroll-reveal";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import {
   BRAND,
@@ -169,41 +170,13 @@ const FAQ = [
   },
 ] as const;
 
-/* ═══════════════════════════ HOOKS ═══════════════════════════ */
-
-function useReveal<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      // Mobile viewports are short; a high threshold never fires and sections stay invisible.
-      { threshold: 0.05, rootMargin: "0px 0px -5% 0px" },
-    );
-    io.observe(el);
-    // Safety: never leave content stuck at opacity-0 if IO misbehaves.
-    const fallback = window.setTimeout(() => setShown(true), 1800);
-    return () => {
-      io.disconnect();
-      window.clearTimeout(fallback);
-    };
-  }, []);
-  return { ref, shown };
-}
-
 /* ═══════════════════════════ COMPONENT ═══════════════════════════ */
 
 function AstraLanding() {
   return (
     <main className="relative overflow-x-clip bg-background text-foreground">
       <Analytics />
+      <ScrollProgress />
       <CustomCursor />
       <Header />
       <HeroCarousel />
@@ -430,32 +403,24 @@ function Marquee() {
 }
 
 function Problem() {
-  const { ref, shown } = useReveal<HTMLDivElement>();
   return (
     <section className="relative px-6 py-28 md:py-36">
-      <div
-        ref={ref}
-        className={`mx-auto max-w-5xl transition-all duration-1000 ${shown ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"}`}
-      >
+      <ScrollReveal className="mx-auto max-w-5xl" variant="blur">
         <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">01 — El problema</div>
         <h2 className="font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl">
           Tu negocio no necesita simplemente estar en Internet.
           <br />
           <span className="text-gradient-muted">Necesita que Internet trabaje a favor de tu negocio.</span>
         </h2>
+      </ScrollReveal>
 
-        <div className="mt-16 grid gap-3 sm:grid-cols-2">
-          {PROBLEM_POINTS.map((point, i) => (
-            <div
-              key={point}
-              className={`surface-panel rounded-2xl p-6 transition-all duration-700 ${shown ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
-              style={{ transitionDelay: shown ? `${150 + i * 80}ms` : "0ms" }}
-            >
-              <p className="text-base leading-relaxed text-muted-foreground">{point}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <ScrollReveal className="mx-auto mt-16 grid max-w-5xl gap-3 sm:grid-cols-2" variant="up" delay={120} stagger>
+        {PROBLEM_POINTS.map((point) => (
+          <div key={point} data-reveal-child className="surface-panel rounded-2xl p-6">
+            <p className="text-base leading-relaxed text-muted-foreground">{point}</p>
+          </div>
+        ))}
+      </ScrollReveal>
     </section>
   );
 }
@@ -464,37 +429,41 @@ function Ecosystem() {
   return (
     <section id="ecosystem" className="relative border-t border-border px-6 py-28 md:py-36">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">02 — Ecosistema</div>
-        <h2 className="max-w-4xl font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl">
-          Un solo equipo para <span className="text-gradient">construir, atraer y escalar.</span>
-        </h2>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          No vendemos herramientas aisladas. Diseñamos soluciones conectadas con los objetivos reales de cada negocio.
-        </p>
-
-        <div className="surface-panel mt-16 rounded-3xl p-8 md:p-12">
-          <div className="flex flex-col items-stretch gap-3 md:flex-row md:items-center md:gap-2">
-            {ECOSYSTEM.map((step, i) => (
-              <div key={step} className="flex w-full items-center gap-3 md:w-auto md:gap-2">
-                <div className="min-w-0 flex-1 rounded-xl border border-border bg-background/50 px-5 py-4 text-center md:min-w-[140px] md:flex-none">
-                  <div className="text-[10px] uppercase tracking-widest text-[color:var(--label-subtle)]">
-                    Pilar {i + 1}
-                  </div>
-                  <div className="mt-1 font-display font-semibold tracking-tight">{step}</div>
-                </div>
-                {i < ECOSYSTEM.length - 1 && (
-                  <div className="hidden text-lg text-[color:var(--color-accent)]/70 md:block" aria-hidden="true">
-                    →
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <p className="mt-8 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Estrategia + Meta Ads + Web + SaaS funcionan como un ecosistema: dirección, adquisición, presencia y producto
-            alineados al crecimiento.
+        <ScrollReveal variant="up">
+          <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">02 — Ecosistema</div>
+          <h2 className="max-w-4xl font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl">
+            Un solo equipo para <span className="text-gradient">construir, atraer y escalar.</span>
+          </h2>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+            No vendemos herramientas aisladas. Diseñamos soluciones conectadas con los objetivos reales de cada negocio.
           </p>
-        </div>
+        </ScrollReveal>
+
+        <ScrollReveal className="mt-16" variant="scale" delay={100}>
+          <div className="surface-panel rounded-3xl p-8 md:p-12">
+            <div className="flex flex-col items-stretch gap-3 md:flex-row md:items-center md:gap-2">
+              {ECOSYSTEM.map((step, i) => (
+                <div key={step} className="flex w-full items-center gap-3 md:w-auto md:gap-2">
+                  <div className="min-w-0 flex-1 rounded-xl border border-border bg-background/50 px-5 py-4 text-center md:min-w-[140px] md:flex-none">
+                    <div className="text-[10px] uppercase tracking-widest text-[color:var(--label-subtle)]">
+                      Pilar {i + 1}
+                    </div>
+                    <div className="mt-1 font-display font-semibold tracking-tight">{step}</div>
+                  </div>
+                  {i < ECOSYSTEM.length - 1 && (
+                    <div className="hidden text-lg text-[color:var(--color-accent)]/70 md:block" aria-hidden="true">
+                      →
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="mt-8 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              Estrategia + Meta Ads + Web + SaaS funcionan como un ecosistema: dirección, adquisición, presencia y producto
+              alineados al crecimiento.
+            </p>
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );
@@ -518,7 +487,7 @@ function Services() {
 
   return (
     <section id="services" className="relative border-t border-border py-32">
-      <div className="mx-auto mb-12 max-w-7xl px-6">
+      <ScrollReveal className="mx-auto mb-12 max-w-7xl px-6" variant="up">
         <div className="mb-6 text-xs uppercase tracking-[0.3em] text-[color:var(--color-accent)]">03 — Servicios</div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="max-w-3xl font-display text-4xl font-bold leading-tight md:text-6xl">
@@ -528,9 +497,9 @@ function Services() {
           </h2>
           <p className="shrink-0 text-sm text-muted-foreground">Desliza o usa las flechas →</p>
         </div>
-      </div>
+      </ScrollReveal>
 
-      <div className="mx-auto max-w-7xl px-6">
+      <ScrollReveal className="mx-auto max-w-7xl px-6" variant="scale" delay={80}>
         <Carousel setApi={setApi} opts={{ align: "start", loop: true, dragFree: false }} className="w-full">
           <div className="relative px-12 sm:px-14">
             <CarouselPrevious
@@ -585,7 +554,7 @@ function Services() {
             </p>
           </div>
         </Carousel>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -593,7 +562,7 @@ function Services() {
 function WebSection() {
   return (
     <section id="web" className="relative border-t border-border px-6 py-28 md:py-36">
-      <div className="mx-auto max-w-5xl">
+      <ScrollReveal className="mx-auto max-w-5xl" variant="left">
         <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">04 — Web</div>
         <h2 className="font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-5xl">
           Tu sitio web debería hacer más que verse bien.
@@ -610,7 +579,7 @@ function WebSection() {
         >
           Quiero crear mi sitio
         </a>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -618,7 +587,7 @@ function WebSection() {
 function MetaAdsSection() {
   return (
     <section id="meta-ads" className="relative border-t border-border px-6 py-28 md:py-36">
-      <div className="mx-auto max-w-6xl">
+      <ScrollReveal className="mx-auto max-w-6xl" variant="right">
         <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">05 — Meta Ads</div>
         <h2 className="max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-5xl">
           Haz que tu negocio llegue a las personas correctas.
@@ -649,7 +618,7 @@ function MetaAdsSection() {
         >
           Quiero impulsar mi negocio
         </a>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -657,7 +626,7 @@ function MetaAdsSection() {
 function SaasSection() {
   return (
     <section id="saas" className="relative border-t border-border px-6 py-28 md:py-36">
-      <div className="mx-auto max-w-6xl">
+      <ScrollReveal className="mx-auto max-w-6xl" variant="up">
         <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">
           06 — Aplicaciones SaaS
         </div>
@@ -671,10 +640,7 @@ function SaasSection() {
 
         <div className="mt-12 flex flex-wrap gap-2.5">
           {SAAS_EXAMPLES.map((ex) => (
-            <span
-              key={ex}
-              className="surface-panel rounded-md px-3.5 py-2 text-sm text-muted-foreground"
-            >
+            <span key={ex} className="surface-panel rounded-md px-3.5 py-2 text-sm text-muted-foreground">
               {ex}
             </span>
           ))}
@@ -689,7 +655,7 @@ function SaasSection() {
         >
           Quiero desarrollar mi solución
         </a>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -698,7 +664,7 @@ function Method() {
   return (
     <section id="method" className="relative border-t border-border px-6 py-32">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+        <ScrollReveal className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end" variant="blur">
           <div>
             <div className="mb-6 text-xs uppercase tracking-[0.3em] text-[color:var(--color-accent)]">
               07 — Método ASTRA
@@ -712,33 +678,26 @@ function Method() {
           <p className="max-w-sm text-sm text-muted-foreground">
             Un proceso claro para pasar de la conversación a un ecosistema digital en marcha.
           </p>
-        </div>
+        </ScrollReveal>
 
-        <div className="grid gap-4 md:grid-cols-5">
-          {METHOD.map((m, i) => (
-            <MethodCard key={m.k} m={m} i={i} />
+        <ScrollReveal className="grid gap-4 md:grid-cols-5" variant="up" delay={100} stagger>
+          {METHOD.map((m) => (
+            <div
+              key={m.k}
+              data-reveal-child
+              className="group surface-panel rounded-2xl p-6 transition-all duration-700 hover:-translate-y-0.5 hover:bg-[color:var(--surface-hover-subtle)]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-display text-xs text-[color:var(--label-subtle)]">{m.k}</span>
+                <span className="h-2 w-2 rounded-full bg-[color:var(--color-accent)] opacity-60 transition-opacity group-hover:opacity-100" />
+              </div>
+              <h3 className="mt-6 font-display text-2xl font-bold">{m.t}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{m.d}</p>
+            </div>
           ))}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
-  );
-}
-
-function MethodCard({ m, i }: { m: (typeof METHOD)[number]; i: number }) {
-  const { ref, shown } = useReveal<HTMLDivElement>();
-  return (
-    <div
-      ref={ref}
-      className={`group surface-panel rounded-2xl p-6 transition-all duration-700 hover:-translate-y-0.5 hover:bg-[color:var(--surface-hover-subtle)] ${shown ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}
-      style={{ transitionDelay: `${i * 80}ms` }}
-    >
-      <div className="flex items-center justify-between">
-        <span className="font-display text-xs text-[color:var(--label-subtle)]">{m.k}</span>
-        <span className="h-2 w-2 rounded-full bg-[color:var(--color-accent)] opacity-60 transition-opacity group-hover:opacity-100" />
-      </div>
-      <h3 className="mt-6 font-display text-2xl font-bold">{m.t}</h3>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{m.d}</p>
-    </div>
   );
 }
 
@@ -746,21 +705,24 @@ function Work() {
   return (
     <section id="work" className="relative border-t border-border px-6 py-32">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 text-xs uppercase tracking-[0.3em] text-[color:var(--color-accent)]">08 — Trabajo</div>
-        <h2 className="max-w-3xl font-display text-4xl font-bold leading-tight md:text-6xl">
-          Experiencias pensadas
-          <br />
-          <span className="text-gradient-muted">para industrias reales.</span>
-        </h2>
-        <p className="mt-6 max-w-xl text-muted-foreground">
-          Exploramos sectores donde la presencia digital y la conversión marcan la diferencia. El portafolio interactivo
-          del hero muestra el nivel de detalle con el que diseñamos.
-        </p>
+        <ScrollReveal variant="blur">
+          <div className="mb-6 text-xs uppercase tracking-[0.3em] text-[color:var(--color-accent)]">08 — Trabajo</div>
+          <h2 className="max-w-3xl font-display text-4xl font-bold leading-tight md:text-6xl">
+            Experiencias pensadas
+            <br />
+            <span className="text-gradient-muted">para industrias reales.</span>
+          </h2>
+          <p className="mt-6 max-w-xl text-muted-foreground">
+            Exploramos sectores donde la presencia digital y la conversión marcan la diferencia. El portafolio interactivo
+            del hero muestra el nivel de detalle con el que diseñamos.
+          </p>
+        </ScrollReveal>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <ScrollReveal className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3" variant="up" delay={80} stagger>
           {WORK.map((c) => (
             <article
               key={c.name}
+              data-reveal-child
               className="group relative overflow-hidden rounded-3xl surface-panel transition-transform hover:-translate-y-0.5"
             >
               <div className="aspect-[4/5] overflow-hidden">
@@ -778,7 +740,7 @@ function Work() {
               </div>
             </article>
           ))}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );
@@ -787,7 +749,7 @@ function Work() {
 function ContactSection() {
   return (
     <section id="contact" className="relative border-t border-border px-6 py-32">
-      <div className="mx-auto max-w-4xl">
+      <ScrollReveal className="mx-auto max-w-4xl" variant="up">
         <div className="mb-6 text-xs uppercase tracking-[0.3em] text-[color:var(--color-accent)]">09 — Conversemos</div>
         <h2 className="font-display text-4xl font-bold leading-tight md:text-5xl">
           Cuéntanos qué estás construyendo
@@ -798,7 +760,7 @@ function ContactSection() {
         <div className="mt-12">
           <LeadForm />
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   );
 }
@@ -808,14 +770,16 @@ function Faq() {
   return (
     <section id="faq" className="relative border-t border-border px-6 py-32">
       <div className="mx-auto max-w-4xl">
-        <div className="mb-6 text-xs uppercase tracking-[0.3em] text-[color:var(--color-accent)]">10 — FAQ</div>
-        <h2 className="font-display text-4xl font-bold leading-tight md:text-6xl">
-          Preguntas,
-          <br />
-          <span className="text-gradient-muted">respuestas claras.</span>
-        </h2>
+        <ScrollReveal variant="left">
+          <div className="mb-6 text-xs uppercase tracking-[0.3em] text-[color:var(--color-accent)]">10 — FAQ</div>
+          <h2 className="font-display text-4xl font-bold leading-tight md:text-6xl">
+            Preguntas,
+            <br />
+            <span className="text-gradient-muted">respuestas claras.</span>
+          </h2>
+        </ScrollReveal>
 
-        <div className="mt-16 divide-y divide-border border-y border-border">
+        <ScrollReveal className="mt-16 divide-y divide-border border-y border-border" variant="up" delay={100}>
           {FAQ.map((f, i) => {
             const isOpen = open === i;
             return (
@@ -841,7 +805,7 @@ function Faq() {
               </div>
             );
           })}
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );
@@ -853,11 +817,11 @@ function FinalCta() {
 
   return (
     <section id="cta" className="relative overflow-hidden border-t border-border px-6 py-32">
-        <div className="pointer-events-none absolute inset-0 -z-10">
+      <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-1/2 top-1/2 h-[50vh] w-[50vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[color:var(--color-accent)]/20 blur-[48px] md:h-[70vh] md:w-[70vh] md:bg-[color:var(--color-accent)]/12 md:blur-[140px]" />
       </div>
 
-      <div className="mx-auto max-w-4xl text-center">
+      <ScrollReveal className="mx-auto max-w-4xl text-center" variant="scale">
         <h2 className="font-display text-5xl font-bold leading-[0.95] md:text-7xl">
           ¿Qué estás
           <br />
@@ -900,11 +864,9 @@ function FinalCta() {
             Conoce más de ASTRA en Instagram →
           </a>
         ) : (
-          <p className="mt-8 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            {BRAND.microcopy}
-          </p>
+          <p className="mt-8 text-xs uppercase tracking-[0.2em] text-muted-foreground">{BRAND.microcopy}</p>
         )}
-      </div>
+      </ScrollReveal>
     </section>
   );
 }

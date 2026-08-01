@@ -302,7 +302,14 @@ export function HeroCarousel() {
         onPointerUp={onPointerUp}
         onPointerLeave={() => { dragStart.current = null; }}
       >
-        <div className="premium-coverflow-stage mx-auto w-full max-w-[1200px] px-4 select-none">
+        <div
+          className="premium-coverflow-stage mx-auto w-full max-w-[1200px] px-4 select-none"
+          style={{
+            transform: `translateY(${parallax * 28}px) scale(${1 - parallax * 0.06})`,
+            opacity: Math.max(0.35, 1 - parallax * 0.45),
+            transition: "transform 0.15s linear, opacity 0.15s linear",
+          }}
+        >
           <div className="premium-coverflow-track relative mx-auto w-[min(82vw,400px)] aspect-[3/4] md:w-[440px]">
             {PORTFOLIO.map((item, i) => {
               const offset = getOffset(i, slide);

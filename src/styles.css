@@ -170,6 +170,92 @@
     scroll-behavior: smooth;
   }
 
+  /* ── Premium scroll reveals ── */
+  .astra-reveal {
+    --reveal-delay: 0ms;
+    opacity: 0;
+    filter: blur(10px);
+    transform: translate3d(0, 36px, 0) scale(0.985);
+    transition:
+      opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay),
+      transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay),
+      filter 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay);
+    will-change: transform, opacity, filter;
+  }
+
+  .astra-reveal--up {
+    transform: translate3d(0, 40px, 0) scale(0.985);
+  }
+
+  .astra-reveal--blur {
+    transform: translate3d(0, 24px, 0);
+    filter: blur(14px);
+  }
+
+  .astra-reveal--scale {
+    transform: translate3d(0, 20px, 0) scale(0.94);
+    filter: blur(8px);
+  }
+
+  .astra-reveal--left {
+    transform: translate3d(-36px, 16px, 0);
+  }
+
+  .astra-reveal--right {
+    transform: translate3d(36px, 16px, 0);
+  }
+
+  .astra-reveal.is-visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .astra-reveal--stagger > [data-reveal-child] {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate3d(0, 28px, 0);
+    transition:
+      opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .astra-reveal--stagger.is-visible > [data-reveal-child] {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  .astra-reveal--stagger.is-visible > [data-reveal-child]:nth-child(1) { transition-delay: 80ms; }
+  .astra-reveal--stagger.is-visible > [data-reveal-child]:nth-child(2) { transition-delay: 160ms; }
+  .astra-reveal--stagger.is-visible > [data-reveal-child]:nth-child(3) { transition-delay: 240ms; }
+  .astra-reveal--stagger.is-visible > [data-reveal-child]:nth-child(4) { transition-delay: 320ms; }
+  .astra-reveal--stagger.is-visible > [data-reveal-child]:nth-child(5) { transition-delay: 400ms; }
+  .astra-reveal--stagger.is-visible > [data-reveal-child]:nth-child(6) { transition-delay: 480ms; }
+  .astra-reveal--stagger.is-visible > [data-reveal-child]:nth-child(7) { transition-delay: 560ms; }
+
+  @media (max-width: 767px) {
+    .astra-reveal {
+      filter: blur(6px);
+      transform: translate3d(0, 28px, 0);
+    }
+
+    .astra-reveal.is-visible {
+      filter: blur(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .astra-reveal,
+    .astra-reveal--stagger > [data-reveal-child] {
+      opacity: 1 !important;
+      filter: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

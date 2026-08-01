@@ -21,7 +21,8 @@ export default defineConfig({
       // Custom SSR entry: src/server.ts
       server: { entry: "server" },
     }),
-    nitro({ preset: "cloudflare-module" }),
+    // Default Nitro preset works on Vercel; Cloudflare can be set in hosting if needed.
+    nitro(),
     viteReact(),
   ],
 });

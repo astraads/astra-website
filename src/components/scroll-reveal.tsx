@@ -14,7 +14,7 @@ type ScrollRevealProps = {
 
 /**
  * Premium scroll reveal — fires once when the block enters the viewport.
- * Uses CSS classes in styles.css (.astra-reveal*).
+ * Mobile uses stronger travel + later trigger so motion reads as clearly as desktop.
  */
 export function ScrollReveal({
   children,
@@ -37,14 +37,19 @@ export function ScrollReveal({
       return;
     }
 
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    // Mobile: wait until more of the block is on screen so the entrance is obvious.
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && entry.intersectionRatio >= (mobile ? 0.18 : 0.1)) {
           setVisible(true);
           io.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+      {
+        threshold: mobile ? [0.18, 0.28, 0.4] : [0.1, 0.2],
+        rootMargin: mobile ? "0px 0px -18% 0px" : "0px 0px -8% 0px",
+      },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -95,10 +100,13 @@ export function ScrollProgress() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] origin-left bg-transparent" aria-hidden="true">
+    <div
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2.5px] origin-left bg-transparent md:h-[2px]"
+      aria-hidden="true"
+    >
       <div
         ref={barRef}
-        className="h-full w-full origin-left bg-[color:var(--color-accent)] shadow-[0_0_12px_color-mix(in_srgb,var(--color-accent)_70%,transparent)]"
+        className="h-full w-full origin-left bg-[color:var(--color-accent)] shadow-[0_0_14px_color-mix(in_srgb,var(--color-accent)_75%,transparent)]"
         style={{ transform: "scaleX(0)" }}
       />
     </div>

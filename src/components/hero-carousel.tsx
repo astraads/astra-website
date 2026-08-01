@@ -239,20 +239,20 @@ export function HeroCarousel() {
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         <div
           className="absolute -left-[20%] top-[10%] h-[42vh] w-[42vh] md:h-[60vh] md:w-[60vh]"
-          style={{ transform: `translateY(${parallax * -30}px)` }}
+          style={{ transform: `translateY(${parallax * (isMobile ? -48 : -30)}px)` }}
         >
           <div
             className="premium-ambient-orb h-full w-full rounded-full blur-[40px] transition-[background] duration-[1400ms] md:blur-[120px]"
-            style={{ background: accent, opacity: isMobile ? 0.32 : 0.18 }}
+            style={{ background: accent, opacity: isMobile ? 0.38 : 0.18 }}
           />
         </div>
         <div
           className="absolute -right-[15%] bottom-[20%] h-[36vh] w-[36vh] md:h-[50vh] md:w-[50vh]"
-          style={{ transform: `translateY(${parallax * 20}px)` }}
+          style={{ transform: `translateY(${parallax * (isMobile ? 36 : 20)}px)` }}
         >
           <div
             className="premium-ambient-orb premium-ambient-orb--b h-full w-full rounded-full blur-[36px] transition-[background] duration-[1400ms] md:blur-[100px]"
-            style={{ background: "#6C63FF", opacity: isMobile ? 0.26 : 0.12 }}
+            style={{ background: "#6C63FF", opacity: isMobile ? 0.3 : 0.12 }}
           />
         </div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(255,255,255,0.04),transparent_50%)]" />
@@ -305,9 +305,11 @@ export function HeroCarousel() {
         <div
           className="premium-coverflow-stage mx-auto w-full max-w-[1200px] px-4 select-none"
           style={{
-            transform: `translateY(${parallax * 28}px) scale(${1 - parallax * 0.06})`,
-            opacity: Math.max(0.35, 1 - parallax * 0.45),
-            transition: "transform 0.15s linear, opacity 0.15s linear",
+            transform: isMobile
+              ? `translateY(${parallax * 48}px) scale(${1 - parallax * 0.1})`
+              : `translateY(${parallax * 28}px) scale(${1 - parallax * 0.06})`,
+            opacity: Math.max(isMobile ? 0.28 : 0.35, 1 - parallax * (isMobile ? 0.55 : 0.45)),
+            transition: "transform 0.12s linear, opacity 0.12s linear",
           }}
         >
           <div className="premium-coverflow-track relative mx-auto w-[min(82vw,400px)] aspect-[3/4] md:w-[440px]">

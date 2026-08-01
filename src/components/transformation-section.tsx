@@ -52,21 +52,21 @@ function useInView<T extends HTMLElement>(threshold = 0.08) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && entry.intersectionRatio >= (mobile ? 0.16 : threshold)) {
           setInView(true);
           io.disconnect();
         }
       },
-      { threshold, rootMargin: "0px 0px -5% 0px" },
+      {
+        threshold: mobile ? [0.16, 0.28, 0.4] : [threshold, 0.2],
+        rootMargin: mobile ? "0px 0px -16% 0px" : "0px 0px -5% 0px",
+      },
     );
     io.observe(el);
-    const fallback = window.setTimeout(() => setInView(true), 2000);
-    return () => {
-      io.disconnect();
-      window.clearTimeout(fallback);
-    };
+    return () => io.disconnect();
   }, [threshold]);
 
   return { ref, inView };
@@ -79,6 +79,8 @@ function useParallax(speed = 0.3) {
     const el = ref.current;
     if (!el) return;
     let raf = 0;
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
+    const factor = mobile ? speed * 1.35 : speed;
 
     const onScroll = () => {
       if (raf) return;
@@ -88,7 +90,7 @@ function useParallax(speed = 0.3) {
         const viewH = window.innerHeight;
         if (rect.bottom < 0 || rect.top > viewH) return;
         const progress = (viewH - rect.top) / (viewH + rect.height);
-        el.style.transform = `translate3d(0, ${(progress - 0.5) * speed * 100}px, 0)`;
+        el.style.transform = `translate3d(0, ${(progress - 0.5) * factor * 100}px, 0)`;
       });
     };
 
@@ -105,7 +107,7 @@ function useParallax(speed = 0.3) {
 
 export function TransformationSection() {
   const { ref: sectionRef, inView } = useInView<HTMLElement>(0.12);
-  const parallaxRef = useParallax(0.35);
+  const parallaxRef = useParallax(0.45);
 
   return (
     <div className="cinematic-zone-outer">
@@ -120,19 +122,19 @@ export function TransformationSection() {
           <div className="absolute inset-0 cz-scrim-gradient" />
           <div className="absolute inset-0 cz-scrim-radial" />
           <div
-            className="absolute -left-[10%] top-[15%] h-[32vh] w-[32vh] rounded-full opacity-30 blur-[40px] md:h-[40vh] md:w-[40vh] md:opacity-20 md:blur-[100px]"
+            className="absolute -left-[10%] top-[15%] h-[32vh] w-[32vh] rounded-full opacity-35 blur-[40px] md:h-[40vh] md:w-[40vh] md:opacity-20 md:blur-[100px]"
             style={{ background: "var(--cz-accent)" }}
           />
           <div
-            className="absolute -right-[8%] bottom-[10%] h-[28vh] w-[28vh] rounded-full opacity-[0.16] blur-[36px] md:h-[35vh] md:w-[35vh] md:opacity-10 md:blur-[90px]"
+            className="absolute -right-[8%] bottom-[10%] h-[28vh] w-[28vh] rounded-full opacity-[0.2] blur-[36px] md:h-[35vh] md:w-[35vh] md:opacity-10 md:blur-[90px]"
             style={{ background: "#ffffff" }}
           />
         </div>
 
         <div className="relative z-[1] mx-auto flex min-h-[72vh] max-w-7xl flex-col justify-center px-6 py-28 md:py-36">
           <div
-            className={`mx-auto max-w-4xl text-center transition-all duration-1000 ease-out ${
-              inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            className={`mx-auto max-w-4xl text-center transition-[opacity,transform] duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none ${
+              inView ? "translate-y-0 scale-100 opacity-100" : "translate-y-12 scale-[0.96] opacity-0 md:translate-y-10 md:scale-100"
             }`}
           >
             <h2
@@ -148,8 +150,10 @@ export function TransformationSection() {
           </div>
 
           <div
-            className={`mx-auto mt-14 grid w-full max-w-5xl grid-cols-1 gap-4 transition-all duration-1000 delay-200 ease-out sm:grid-cols-3 md:mt-16 md:gap-6 ${
-              inView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            className={`mx-auto mt-14 grid w-full max-w-5xl grid-cols-1 gap-4 transition-[opacity,transform] duration-1000 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none sm:grid-cols-3 md:mt-16 md:gap-6 ${
+              inView
+                ? "translate-y-0 scale-100 opacity-100"
+                : "translate-y-10 scale-[0.97] opacity-0 md:translate-y-8 md:scale-100"
             }`}
           >
             {INSIGHT_CARDS.map((card, i) => (

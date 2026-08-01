@@ -62,7 +62,7 @@ El sitio **compila en producción** (`npm run build` OK), no tiene vulnerabilida
    El formulario pone nombre/negocio/teléfono en el query `text=` de `wa.me`. Es inherente a WhatsApp prefilled; no hay servidor propio. Informa al usuario (ya hay aviso) y valora acortar campos si quieres menos PII en URL.
 
 7. **Remote Git**  
-   Conecta `origin` (GitHub/GitLab/Lovable) y haz push de `main` + tag. Este entorno inició Git localmente.
+   Conecta `origin` (GitHub/GitLab) y haz push de `main` + tag.
 
 8. **DNS / HTTPS / www**  
    Configura en el proveedor: HTTPS forzado, redirect www↔apex, no tocar SPF/DKIM/DMARC existentes sin inventario previo.

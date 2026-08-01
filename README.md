@@ -46,7 +46,7 @@ npm run preview
 
 ## Despliegue
 
-1. Configura las mismas variables `VITE_*` en el panel del hosting (Lovable / Cloudflare / Vercel / etc.).
+1. Configura las mismas variables `VITE_*` en el panel del hosting (Cloudflare / Vercel / Netlify / etc.).
 2. Activa HTTPS y redirige HTTP → HTTPS.
 3. Apunta el dominio a la app y actualiza `VITE_SITE_URL`, `public/sitemap.xml` y `public/robots.txt`.
 4. Verifica `/`, `/privacidad`, `/terminos` y refresh sin 404.
@@ -69,6 +69,7 @@ Los CTA leen `src/config/site.ts` — no hace falta tocar cada botón.
 - Hero / coverflow: `src/components/hero-carousel.tsx`
 - Config / mensajes WA: `src/config/site.ts`
 - Estilos / tokens: `src/styles.css`
+- Logo: `public/logo-astra.png` y `src/assets/logo-astra.png`
 
 ## Git (flujo recomendado)
 
@@ -87,7 +88,7 @@ git merge feat/mi-cambio
 - `develop` — integración y pruebas  
 
 **No** subas `.env` / `.env.local`.  
-**No** force-push ni reescribas historial en ramas ya publicadas (especialmente si el proyecto está conectado a Lovable).
+**No** force-push ni reescribas historial en ramas ya publicadas.
 
 ## Rollback
 
@@ -100,7 +101,7 @@ git checkout v1.0.0   # inspección
 
 ## Legal
 
-`/privacidad` y `/terminos` son **borradores**. Deben ser revisados por un profesional según los países donde opere ASTRA.
+Las páginas legales viven en `/privacidad`, `/terminos`, `/tratamiento-datos` y `/cookies`.
 
 ## Scripts
 

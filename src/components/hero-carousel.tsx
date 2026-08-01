@@ -10,6 +10,7 @@ import {
 
 import { PORTFOLIO_MOCKUPS } from "@/components/portfolio-mockups";
 import { BRAND, getWhatsAppUrl, isConfigured, WHATSAPP_NUMBER } from "@/config/site";
+import logoAstra from "@/assets/logo-astra.png";
 
 const PORTFOLIO = [
   {
@@ -241,9 +242,19 @@ export function HeroCarousel() {
 
       {/* Section intro — brand + value proposition */}
       <div className="relative z-[2] mx-auto w-full max-w-4xl shrink-0 px-6 pt-[5.75rem] pb-4 text-center md:pt-[6.5rem] md:pb-6">
-        <p className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
-          ASTRA<span className="text-[#6C63FF]">™</span>
-        </p>
+        <div className="flex items-center justify-center gap-3">
+          <img
+            src={logoAstra}
+            alt="ASTRA"
+            width={36}
+            height={36}
+            className="h-9 w-9 object-contain brightness-0 invert"
+            decoding="async"
+          />
+          <p className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
+            ASTRA<span className="text-[#6C63FF]">™</span>
+          </p>
+        </div>
         <p className="mt-3 text-[10px] uppercase tracking-[0.35em] text-white/45 md:tracking-[0.4em]">
           {BRAND.microcopy}
         </p>

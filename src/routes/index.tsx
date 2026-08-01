@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { Moon, Sun, Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 
 import {
   Carousel,
@@ -16,6 +16,7 @@ import { HeroCarousel } from "@/components/hero-carousel";
 import { Analytics } from "@/components/analytics";
 import { LeadForm } from "@/components/lead-form";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
+import { AstraLogo } from "@/components/astra-logo";
 import {
   BRAND,
   getInstagramUrl,
@@ -282,6 +283,7 @@ function ThemeToggle() {
 }
 
 function Header() {
+  const { theme } = useTheme();
   const [y, setY] = useState(0);
   const [lastY, setLastY] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -313,6 +315,8 @@ function Header() {
     { href: "#faq", label: "FAQ" },
   ] as const;
 
+  const logoOnDark = theme === "dark" || y <= 40;
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-transform duration-500 ${visible || open ? "translate-y-0" : "-translate-y-full"}`}
@@ -320,8 +324,8 @@ function Header() {
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between px-6 py-4 transition-all ${y > 40 || open ? "glass-strong mt-3 rounded-full" : "text-white"}`}
       >
-        <a href="#top" className="font-display text-xl font-bold tracking-tight" onClick={() => setOpen(false)}>
-          ASTRA<span className="text-[color:var(--color-accent)]">™</span>
+        <a href="#top" className="inline-flex items-center" onClick={() => setOpen(false)}>
+          <AstraLogo inverted={logoOnDark} />
         </a>
         <nav
           className={`hidden items-center gap-7 text-sm md:flex ${y > 40 ? "text-muted-foreground" : "text-white/70"}`}
@@ -913,9 +917,7 @@ function Footer() {
     <footer className="border-t border-border px-6 py-12">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
         <div className="flex items-center gap-3">
-          <span className="font-display text-lg font-bold">
-            ASTRA<span className="text-[color:var(--color-accent)]">™</span>
-          </span>
+          <AstraLogo />
           <span className="text-xs text-muted-foreground">Partner tecnológico global</span>
         </div>
         <div className="flex flex-wrap justify-center gap-5 text-xs text-muted-foreground">

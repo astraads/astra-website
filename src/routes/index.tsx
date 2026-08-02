@@ -115,12 +115,11 @@ const ECOSYSTEM = ["Estrategia", "Meta Ads", "Web", "SaaS"] as const;
 
 const META_FLOW = [
   "Estrategia",
-  "Audiencia",
+  "Estructura y montaje de campañas",
+  "Optimización",
+  "Escalamiento",
   "Creatividad",
-  "Meta Ads",
-  "Landing / Web",
-  "Contacto",
-  "Oportunidad",
+  "IA",
 ] as const;
 
 const SAAS_EXAMPLES = [

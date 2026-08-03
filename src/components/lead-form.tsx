@@ -23,6 +23,11 @@ const SERVICES = [
   { value: "other", label: "Otro / aún no lo sé" },
 ] as const;
 
+const DECISION_OPTIONS = [
+  { value: "solo", label: "Yo" },
+  { value: "socio", label: "Yo y mi socio/a" },
+] as const;
+
 const MAX = {
   name: 80,
   business: 120,
@@ -35,6 +40,7 @@ type FormState = {
   business: string;
   whatsappLocal: string;
   service: string;
+  decision: string;
   message: string;
   /** Honeypot — must stay empty */
   company_url: string;
@@ -45,6 +51,7 @@ const INITIAL: FormState = {
   business: "",
   whatsappLocal: "",
   service: "meta_ads",
+  decision: "",
   message: "",
   company_url: "",
 };
@@ -104,6 +111,11 @@ export function LeadForm() {
       return;
     }
 
+    if (!form.decision) {
+      setError("Indica quién participa en la decisión.");
+      return;
+    }
+
     if (!isPlausibleLocalPhone(local, dialCode)) {
       setError("Revisa tu número de WhatsApp.");
       return;
@@ -113,6 +125,8 @@ export function LeadForm() {
     setSubmitting(true);
 
     const serviceLabel = SERVICES.find((s) => s.value === form.service)?.label ?? form.service;
+    const decisionLabel =
+      DECISION_OPTIONS.find((d) => d.value === form.decision)?.label ?? form.decision;
     const body = [
       "Hola ASTRA 👋 Quiero hablar sobre mi proyecto.",
       "",
@@ -120,20 +134,23 @@ export function LeadForm() {
       `Empresa o negocio: ${business}`,
       `WhatsApp: ${whatsapp}`,
       `Servicio de interés: ${serviceLabel}`,
+      `Quién decide: ${decisionLabel}`,
       message ? `Mensaje: ${message}` : null,
     ]
       .filter(Boolean)
       .join("\n");
 
-    trackEvent("lead_form_submit", { service: form.service });
+    trackEvent("lead_form_submit", { service: form.service, decision: form.decision });
     trackEvent("service_select", { service: form.service });
+
+    const messageForCrm = [`Quién decide: ${decisionLabel}`, message || null].filter(Boolean).join("\n");
 
     await saveLead({
       name,
       business,
       whatsapp,
       service: form.service,
-      message,
+      message: messageForCrm,
     });
 
     const url = getWhatsAppUrlWithCustomMessage(body);
@@ -255,6 +272,33 @@ export function LeadForm() {
           </select>
         </Field>
       </div>
+
+      <fieldset className="space-y-3">
+        <legend className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          ¿Quién participa en la decisión de contratar este servicio? *
+        </legend>
+        <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-required="true">
+          {DECISION_OPTIONS.map((opt) => {
+            const selected = form.decision === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setForm((f) => ({ ...f, decision: opt.value }))}
+                className={`rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors ${
+                  selected
+                    ? "border-[color:var(--color-accent)] bg-[color:var(--color-accent)]/10 text-foreground"
+                    : "border-border bg-background/40 text-muted-foreground hover:border-[color:var(--color-accent)]/40 hover:text-foreground"
+                }`}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
 
       <Field label="Mensaje">
         <textarea

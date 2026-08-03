@@ -75,29 +75,29 @@ const METHOD = [
 
 const SERVICES = [
   {
-    t: "Sitios Web & Landing Pages",
-    d: "Experiencias digitales modernas, estratégicas y orientadas a convertir visitantes en oportunidades.",
-    tag: "01 — Web",
-    href: "#web",
-    intent: "web" as const,
-  },
-  {
     t: "Meta Ads",
     d: "Estrategias y campañas publicitarias en Meta conectadas con los objetivos comerciales de cada negocio.",
-    tag: "02 — Ads",
+    tag: "01 — Ads",
     href: "#meta-ads",
     intent: "meta_ads" as const,
   },
   {
+    t: "Sitios Web & Landing Pages",
+    d: "Experiencias digitales modernas, estratégicas y orientadas a convertir visitantes en oportunidades.",
+    tag: "02 — Web",
+    href: "#web",
+    intent: "web" as const,
+  },
+  {
     t: "Aplicaciones SaaS",
-    d: "Desarrollamos aplicaciones SaaS para digitalizar procesos, centralizar información, automatizar tareas o convertir una idea en una solución tecnológica.",
+    d: "Para equipos robustos que necesitan escalar su operación: sistemas, automatización y productos digitales a medida.",
     tag: "03 — SaaS",
     href: "#saas",
     intent: "saas" as const,
   },
   {
     t: "Estrategia Digital",
-    d: "Integramos tecnología, adquisición y presencia digital para construir ecosistemas orientados al crecimiento.",
+    d: "Integramos adquisición, presencia web y producto para construir ecosistemas orientados al crecimiento.",
     tag: "04 — Estrategia",
     href: "#ecosystem",
     intent: "digitalization" as const,
@@ -111,7 +111,7 @@ const PROBLEM_POINTS = [
   "Una buena idea necesita tecnología para convertirse en realidad.",
 ] as const;
 
-const ECOSYSTEM = ["Estrategia", "Meta Ads", "Web", "SaaS"] as const;
+const ECOSYSTEM = ["Meta Ads", "Web", "SaaS"] as const;
 
 const META_FLOW = [
   "Estrategia",
@@ -183,8 +183,8 @@ function AstraLanding() {
       <Problem />
       <Ecosystem />
       <Services />
-      <WebSection />
       <MetaAdsSection />
+      <WebSection />
       <SaasSection />
       <Method />
       <TransformationSection />
@@ -379,9 +379,9 @@ function Header() {
 
 function Marquee() {
   const items = [
+    "Meta Ads",
     "Sitios Web",
     "Landing Pages",
-    "Meta Ads",
     "Aplicaciones SaaS",
     "Estrategia Digital",
     "CRO",
@@ -458,8 +458,8 @@ function Ecosystem() {
               ))}
             </div>
             <p className="mt-8 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-              Estrategia + Meta Ads + Web + SaaS funcionan como un ecosistema: dirección, adquisición, presencia y producto
-              alineados al crecimiento.
+              Meta Ads + Web + SaaS funcionan como un ecosistema: adquisición, presencia y operación alineadas al
+              crecimiento.
             </p>
           </div>
         </ScrollReveal>
@@ -558,36 +558,11 @@ function Services() {
   );
 }
 
-function WebSection() {
-  return (
-    <section id="web" className="relative border-t border-border px-6 py-28 md:py-36">
-      <ScrollReveal className="mx-auto max-w-5xl" variant="left">
-        <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">04 — Web</div>
-        <h2 className="font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-5xl">
-          Tu sitio web debería hacer más que verse bien.
-        </h2>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          Debe comunicar tu valor, generar confianza y facilitar el siguiente paso.
-        </p>
-        <a
-          href={getWhatsAppUrl("web")}
-          target={isConfigured(WHATSAPP_NUMBER) ? "_blank" : undefined}
-          rel={isConfigured(WHATSAPP_NUMBER) ? "noreferrer" : undefined}
-          className="btn-cta mt-10 inline-flex rounded-full px-7 py-3.5 text-sm font-semibold transition-transform hover:scale-[1.02]"
-          data-analytics="cta-web"
-        >
-          Quiero crear mi sitio
-        </a>
-      </ScrollReveal>
-    </section>
-  );
-}
-
 function MetaAdsSection() {
   return (
     <section id="meta-ads" className="relative border-t border-border px-6 py-28 md:py-36">
       <ScrollReveal className="mx-auto max-w-6xl" variant="right">
-        <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">05 — Meta Ads</div>
+        <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">04 — Meta Ads</div>
         <h2 className="max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-5xl">
           Haz que tu negocio llegue a las personas correctas.
         </h2>
@@ -622,6 +597,31 @@ function MetaAdsSection() {
   );
 }
 
+function WebSection() {
+  return (
+    <section id="web" className="relative border-t border-border px-6 py-28 md:py-36">
+      <ScrollReveal className="mx-auto max-w-5xl" variant="left">
+        <div className="mb-6 text-xs uppercase tracking-[0.28em] text-[color:var(--color-accent)]">05 — Web</div>
+        <h2 className="font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-5xl">
+          Tu sitio web debería hacer más que verse bien.
+        </h2>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+          Debe comunicar tu valor, generar confianza y facilitar el siguiente paso.
+        </p>
+        <a
+          href={getWhatsAppUrl("web")}
+          target={isConfigured(WHATSAPP_NUMBER) ? "_blank" : undefined}
+          rel={isConfigured(WHATSAPP_NUMBER) ? "noreferrer" : undefined}
+          className="btn-cta mt-10 inline-flex rounded-full px-7 py-3.5 text-sm font-semibold transition-transform hover:scale-[1.02]"
+          data-analytics="cta-web"
+        >
+          Quiero crear mi sitio
+        </a>
+      </ScrollReveal>
+    </section>
+  );
+}
+
 function SaasSection() {
   return (
     <section id="saas" className="relative border-t border-border px-6 py-28 md:py-36">
@@ -630,11 +630,11 @@ function SaasSection() {
           06 — Aplicaciones SaaS
         </div>
         <h2 className="max-w-3xl font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-5xl">
-          ¿Tu negocio necesita algo más que una página web?
+          Para equipos robustos que necesitan escalar su operación.
         </h2>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          También desarrollamos aplicaciones SaaS para empresas y negocios que necesitan digitalizar procesos,
-          centralizar información, automatizar tareas o convertir una idea en una solución tecnológica.
+          Desarrollamos aplicaciones SaaS y sistemas a medida para digitalizar procesos, centralizar información,
+          automatizar tareas y convertir ideas en productos tecnológicos que sostienen el crecimiento.
         </p>
 
         <div className="mt-12 flex flex-wrap gap-2.5">

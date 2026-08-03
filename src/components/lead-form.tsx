@@ -16,8 +16,8 @@ import { isSupabaseConfigured } from "@/lib/supabase";
 import { getWhatsAppUrlWithCustomMessage, isConfigured, WHATSAPP_NUMBER } from "@/config/site";
 
 const SERVICES = [
-  { value: "web", label: "Sitios Web & Landing Pages" },
   { value: "meta_ads", label: "Meta Ads" },
+  { value: "web", label: "Sitios Web & Landing Pages" },
   { value: "saas", label: "Aplicaciones SaaS" },
   { value: "strategy", label: "Estrategia Digital" },
   { value: "other", label: "Otro / aún no lo sé" },
@@ -44,7 +44,7 @@ const INITIAL: FormState = {
   name: "",
   business: "",
   whatsappLocal: "",
-  service: "web",
+  service: "meta_ads",
   message: "",
   company_url: "",
 };
